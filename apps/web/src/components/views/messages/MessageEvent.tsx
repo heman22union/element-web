@@ -30,6 +30,8 @@ import MStickerBody from "./MStickerBody";
 import MPollBody from "./MPollBody";
 import MLocationBody from "./MLocationBody";
 import MBeaconBody from "./MBeaconBody";
+import MGalleryBody from "./MGalleryBody";
+import { GALLERY_MSGTYPE } from "../../../utils/GalleryContent";
 import { type GetRelationsForEvent, type IEventTileOps } from "../rooms/EventTile";
 import { MjolnirBodyViewModel } from "../../../viewmodels/room/timeline/event-tile/body/MjolnirBodyViewModel";
 import {
@@ -75,6 +77,7 @@ const baseBodyTypes = new Map<string, React.ComponentType<IBodyProps>>([
     [MsgType.File, (props: IBodyProps) => renderMBody(props, FileBodyFactory)!],
     [MsgType.Audio, MVoiceOrAudioBody],
     [MsgType.Video, VideoBodyFactory],
+    [GALLERY_MSGTYPE, MGalleryBody],
 ]);
 const baseEvTypes = new Map<string, React.ComponentType<IBodyProps>>([
     [EventType.Sticker, MStickerBody],
