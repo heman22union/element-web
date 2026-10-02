@@ -13,6 +13,7 @@ import { type MediaEventHelper } from "../../../utils/MediaEventHelper";
 import type EditorStateTransfer from "../../../utils/EditorStateTransfer";
 import { type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
 import { type GetRelationsForEvent } from "../rooms/EventTile";
+import { type ImageViewerGroup } from "./NavigableImageViewDialog";
 
 export interface IBodyProps {
     mxEvent: MatrixEvent;
@@ -55,4 +56,10 @@ export interface IBodyProps {
      * Optional ID for the root element.
      */
     id?: string;
+
+    /**
+     * For an image shown together with others (e.g. in a gallery), the images that the image viewer should
+     * offer to flip through, when it is opened from this one.
+     */
+    imageViewerGroup?: ImageViewerGroup;
 }

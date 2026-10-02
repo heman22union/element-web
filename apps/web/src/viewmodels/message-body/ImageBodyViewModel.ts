@@ -33,6 +33,9 @@ import { DecryptError, DownloadError } from "../../utils/DecryptFile";
 import { BLURHASH_FIELD, createThumbnail } from "../../utils/image-media";
 import { isMimeTypeAllowed } from "../../utils/blobs";
 import ImageView from "../../components/views/elements/ImageView";
+import NavigableImageViewDialog, {
+    type ImageViewerGroup,
+} from "../../components/views/messages/NavigableImageViewDialog";
 
 export interface ImageBodyViewModelProps {
     /**
@@ -71,6 +74,10 @@ export interface ImageBodyViewModelProps {
      * Callback invoked when hidden media is revealed.
      */
     setMediaVisible?: (visible: boolean) => void;
+    /**
+     * Images shown together with this one, which the image viewer can flip through.
+     */
+    imageViewerGroup?: ImageViewerGroup;
 }
 
 interface LoadedImageDimensions {
@@ -499,6 +506,22 @@ export class ImageBodyViewModel
             };
         }
 
+        const { imageViewerGroup } = this.props;
+        if (imageViewerGroup && imageViewerGroup.items.length > 1) {
+            Modal.createDialog(
+                NavigableImageViewDialog,
+                {
+                    group: imageViewerGroup,
+                    permalinkCreator: params.permalinkCreator,
+                    thumbnailInfo: params.thumbnailInfo,
+                },
+                "mx_Dialog_lightbox",
+                undefined,
+                true,
+            );
+            return;
+        }
+
         Modal.createDialog(ImageView, params, "mx_Dialog_lightbox", undefined, true);
     }
 
@@ -612,6 +635,17 @@ export class ImageBodyViewModel
             this.scheduleBlurhashPlaceholder();
             void this.downloadImage();
         }
+    }
+
+    public setImageViewerGroup(imageViewerGroup?: ImageViewerGroup): void {
+        if (this.props.imageViewerGroup === imageViewerGroup) {
+            return;
+        }
+
+        this.props = {
+            ...this.props,
+            imageViewerGroup,
+        };
     }
 
     public setPermalinkCreator(permalinkCreator?: RoomPermalinkCreator): void {

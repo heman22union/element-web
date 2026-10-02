@@ -12,6 +12,7 @@ import { type IBodyProps } from "./IBodyProps";
 import MVoiceOrAudioBody from "./MVoiceOrAudioBody";
 import { FileBodyFactory, ImageBodyFactory, VideoBodyFactory } from "./MBodyFactory";
 import { TextualBodyFactory } from "./TextualBodyFactory";
+import { type ImageViewerGroup } from "./NavigableImageViewDialog";
 import { MediaEventHelper } from "../../../utils/MediaEventHelper";
 import { type GalleryContent, type GalleryItemContent } from "../../../utils/GalleryContent";
 
@@ -65,7 +66,15 @@ function buildItems(mxEvent: MatrixEvent): GalleryItem[] {
         });
 }
 
-function GalleryItemBody({ item, bodyProps }: { item: GalleryItem; bodyProps: IBodyProps }): JSX.Element {
+function GalleryItemBody({
+    item,
+    bodyProps,
+    imageViewerGroup,
+}: {
+    item: GalleryItem;
+    bodyProps: IBodyProps;
+    imageViewerGroup?: ImageViewerGroup;
+}): JSX.Element {
     const props: IBodyProps = {
         ...bodyProps,
         ref: undefined,
@@ -73,6 +82,7 @@ function GalleryItemBody({ item, bodyProps }: { item: GalleryItem; bodyProps: IB
         mediaEventHelper: item.mediaEventHelper,
         // The caption belongs to the gallery as a whole, not the individual items.
         showFileInfo: false,
+        imageViewerGroup,
     };
 
     switch (item.event.getContent().msgtype) {
@@ -101,12 +111,23 @@ export default function MGalleryBody(props: IBodyProps): JSX.Element {
         return () => items.forEach((item) => item.mediaEventHelper.destroy());
     }, [items]);
 
+    // Opening one of the images in the viewer lets it flip through the other images of the gallery.
+    const imageViewerGroups = useMemo(() => {
+        const images = items.filter((item) => item.event.getContent().msgtype === MsgType.Image);
+        const viewerItems = images.map(({ event, mediaEventHelper }) => ({ mxEvent: event, mediaEventHelper }));
+        return new Map(images.map((item, index) => [item.key, { items: viewerItems, index }]));
+    }, [items]);
+
     return (
         <div className="mx_EventTile_content">
             <div className="mx_MGalleryBody" data-count={items.length}>
                 {items.map((item) => (
                     <div className="mx_MGalleryBody_item" key={item.key}>
-                        <GalleryItemBody item={item} bodyProps={props} />
+                        <GalleryItemBody
+                            item={item}
+                            bodyProps={props}
+                            imageViewerGroup={imageViewerGroups.get(item.key)}
+                        />
                     </div>
                 ))}
             </div>

@@ -116,6 +116,25 @@ $button-gap: var(--cpd-space-3x);
     background: #21262c; /* same on all themes */
 }
 
+/* Previous/next buttons sit at the sides of the viewport, outside the image */
+.mx_ImageView_navButton {
+    --icon-size: 28px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 100%;
+    background: #21262c; /* same on all themes */
+    pointer-events: initial;
+
+    &.mx_ImageView_navButton_previous {
+        left: var(--cpd-space-4x);
+    }
+
+    &.mx_ImageView_navButton_next {
+        right: var(--cpd-space-4x);
+    }
+}
+
 @media (prefers-reduced-motion) {
     .mx_ImageView_image_animating {
         transition: none !important;

@@ -12,6 +12,8 @@ import React, { type JSX, createRef, type CSSProperties, useEffect } from "react
 import FocusLock from "react-focus-lock";
 import { type MatrixEvent } from "matrix-js-sdk/src/matrix";
 import {
+    ChevronLeftIcon,
+    ChevronRightIcon,
     CloseIcon,
     DownloadIcon,
     OverflowHorizontalIcon,
@@ -35,6 +37,7 @@ import { normalizeWheelEvent } from "../../../utils/Mouse";
 import UIStore from "../../../stores/UIStore";
 import { type ViewRoomPayload } from "../../../dispatcher/payloads/ViewRoomPayload";
 import { KeyBindingAction } from "../../../accessibility/KeyboardShortcuts";
+import { Key } from "../../../Keyboard";
 import { getKeyBindingsManager } from "../../../KeyBindingsManager";
 import { presentableTextForFile } from "../../../utils/FileUtils";
 import AccessibleButton from "./AccessibleButton";
@@ -81,6 +84,16 @@ interface IProps {
         width: number;
         height: number;
     };
+
+    /**
+     * If set, a button and the left arrow key are offered to show the previous image.
+     */
+    onPrevious?: () => void;
+    /**
+     * If set, a button and the right arrow key are offered to show the next image.
+     */
+    onNext?: () => void;
+
     onFinished(): void;
 }
 
@@ -316,6 +329,17 @@ export default class ImageView extends React.Component<IProps, IState> {
                 ev.stopPropagation();
                 if (this.downloadFunction) {
                     void this.downloadFunction();
+                }
+                break;
+            default:
+                if (ev.key === Key.ARROW_LEFT && this.props.onPrevious) {
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                    this.props.onPrevious();
+                } else if (ev.key === Key.ARROW_RIGHT && this.props.onNext) {
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                    this.props.onNext();
                 }
                 break;
         }
@@ -607,6 +631,24 @@ export default class ImageView extends React.Component<IProps, IState> {
                         onMouseDown={this.onStartMoving}
                     />
                 </div>
+                {this.props.onPrevious && (
+                    <AccessibleButton
+                        className="mx_ImageView_button mx_ImageView_navButton mx_ImageView_navButton_previous"
+                        title={_t("action|previous")}
+                        onClick={this.props.onPrevious}
+                    >
+                        <ChevronLeftIcon />
+                    </AccessibleButton>
+                )}
+                {this.props.onNext && (
+                    <AccessibleButton
+                        className="mx_ImageView_button mx_ImageView_navButton mx_ImageView_navButton_next"
+                        title={_t("action|next")}
+                        onClick={this.props.onNext}
+                    >
+                        <ChevronRightIcon />
+                    </AccessibleButton>
+                )}
             </FocusLock>
         );
     }

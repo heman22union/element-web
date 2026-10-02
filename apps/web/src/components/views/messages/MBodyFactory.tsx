@@ -192,10 +192,17 @@ export function ImageBodyFactory({
     maxImageHeight,
     permalinkCreator,
     showFileInfo,
+    imageViewerGroup,
 }: Readonly<
     Pick<
         IBodyProps,
-        "mxEvent" | "mediaEventHelper" | "forExport" | "maxImageHeight" | "permalinkCreator" | "showFileInfo"
+        | "mxEvent"
+        | "mediaEventHelper"
+        | "forExport"
+        | "maxImageHeight"
+        | "permalinkCreator"
+        | "showFileInfo"
+        | "imageViewerGroup"
     >
 >): JSX.Element {
     const { timelineRenderingType } = useContext(RoomContext);
@@ -219,6 +226,7 @@ export function ImageBodyFactory({
                 timelineRenderingType,
                 imageRef,
                 setMediaVisible,
+                imageViewerGroup,
             }),
     );
 
@@ -256,6 +264,11 @@ export function ImageBodyFactory({
         if (shouldFallbackToFileBody) return;
         vm.setTimelineRenderingType(timelineRenderingType);
     }, [shouldFallbackToFileBody, timelineRenderingType, vm]);
+
+    useEffect(() => {
+        if (shouldFallbackToFileBody) return;
+        vm.setImageViewerGroup(imageViewerGroup);
+    }, [imageViewerGroup, shouldFallbackToFileBody, vm]);
 
     useEffect(() => {
         if (shouldFallbackToFileBody) return;

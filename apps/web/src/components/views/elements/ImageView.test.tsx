@@ -32,6 +32,57 @@ describe("<ImageView />", () => {
         expect(container).toMatchSnapshot();
     });
 
+    describe("navigation", () => {
+        const src = "https://example.com/image.png";
+
+        it("offers no navigation unless asked to", () => {
+            const { queryByRole } = render(<ImageView src={src} onFinished={vi.fn()} />);
+            expect(queryByRole("button", { name: "Previous" })).toBeNull();
+            expect(queryByRole("button", { name: "Next" })).toBeNull();
+        });
+
+        it("only shows the buttons that can be used", () => {
+            const { queryByRole } = render(<ImageView src={src} onNext={vi.fn()} onFinished={vi.fn()} />);
+            expect(queryByRole("button", { name: "Previous" })).toBeNull();
+            expect(queryByRole("button", { name: "Next" })).not.toBeNull();
+        });
+
+        it("navigates with the buttons", () => {
+            const onPrevious = vi.fn();
+            const onNext = vi.fn();
+            const { getByRole } = render(
+                <ImageView src={src} onPrevious={onPrevious} onNext={onNext} onFinished={vi.fn()} />,
+            );
+
+            fireEvent.click(getByRole("button", { name: "Previous" }));
+            expect(onPrevious).toHaveBeenCalledTimes(1);
+            fireEvent.click(getByRole("button", { name: "Next" }));
+            expect(onNext).toHaveBeenCalledTimes(1);
+        });
+
+        it("navigates with the arrow keys", () => {
+            const onPrevious = vi.fn();
+            const onNext = vi.fn();
+            const { getByRole } = render(
+                <ImageView src={src} onPrevious={onPrevious} onNext={onNext} onFinished={vi.fn()} />,
+            );
+            const dialog = getByRole("dialog");
+
+            fireEvent.keyDown(dialog, { key: "ArrowLeft" });
+            expect(onPrevious).toHaveBeenCalledTimes(1);
+            fireEvent.keyDown(dialog, { key: "ArrowRight" });
+            expect(onNext).toHaveBeenCalledTimes(1);
+        });
+
+        it("ignores the arrow keys when there is nowhere to go", () => {
+            const onNext = vi.fn();
+            const { getByRole } = render(<ImageView src={src} onNext={onNext} onFinished={vi.fn()} />);
+
+            fireEvent.keyDown(getByRole("dialog"), { key: "ArrowLeft" });
+            expect(onNext).not.toHaveBeenCalled();
+        });
+    });
+
     it("should download on click", async () => {
         fetchMock.get("https://example.com/image.png", "TESTFILE");
         const { getByRole } = render(
